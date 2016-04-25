@@ -48,7 +48,6 @@ void GLWidget::glutRender()
   world.m[3][0] = 0.0f; world.m[3][1] = 0.0f; world.m[3][2] = 0.0f; world.m[3][3] = 1.0f;
 
   glUniformMatrix4fv(_gWorldLocation, 1, GL_TRUE, &world.m[0][0]);
-  glUniform1f(_gScaleLocation, sinf(scale));
 
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, _VBO);

@@ -13,18 +13,24 @@ TEMPLATE = app
 
 INCLUDEPATH += ../../Source \
                ../../Include \
-               ../../Include/assimp
+               ../../Include/assimp \
+               ../../Include/ATB
 
 SOURCES += ../../Source/main.cpp\
            ../../Source/mainwindow.cpp \
            ../../Source/GLWidget.cpp \
            ../../Common/ogldev_util.cpp \
            ../../Common/math_3d.cpp \
-           ../../Common/pipeline.cpp
+           ../../Common/pipeline.cpp \
+           ../../Common/camera.cpp \
+           ../../Common/ogldev_atb.cpp
 
 HEADERS  += ../../Source/mainwindow.h \
             ../../Source/GLWidget.h
 
 FORMS    += ../../Source/mainwindow.ui
 
-LIBS += -lglut -lGLEW -Lassimp
+LIBS += -L/home/lparkin/Projects/S3/LearnOpenGL/Lib
+
+LIBS += -lglut -lGLEW -lAntTweakBar
+#-lassimp

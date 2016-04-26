@@ -15,9 +15,11 @@ int GLWidget::_myGlutWindow = 0;
 GLuint GLWidget::_VBO = 0;
 GLuint GLWidget::_IBO = 0;
 GLuint GLWidget::_gWorldLocation = 0;
-
+GLuint GLWidget::_gWVPLocation = 0;
 GLuint GLWidget::_gScaleLocation;
+
 PersProjInfo GLWidget::_gPersProjInfo = PersProjInfo();
+Camera* GLWidget::_pGameCamera = NULL;
 
 const char* pVSFileName = "/home/lparkin/Projects/S3/LearnOpenGL/shader.vs";
 const char* pFSFileName = "/home/lparkin/Projects/S3/LearnOpenGL/shader.fs";
@@ -51,11 +53,16 @@ void GLWidget::glutRender()
 
   Pipeline pipeLine;
   pipeLine.Rotate(0.0f, scale, 0.0f);
-  pipeLine.WorldPos(0.0f, 0.0f, 5.0f);
+  pipeLine.WorldPos(0.0f, 0.0f, 3.0f);
+
+  Vector3f CameraPos(0.0f, 0.0f, -3.0f);
+  Vector3f CameraTarget(0.0f, 0.0f, 2.0f);
+  Vector3f CameraUp(0.0f, 1.0f, 0.0f);
+  pipeLine.SetCamera(CameraPos, CameraTarget, CameraUp);
   pipeLine.SetPerspectiveProj(_gPersProjInfo);
 
   /// Load the matrix into the shader.
-  glUniformMatrix4fv(_gWorldLocation, 1, GL_TRUE, (const GLfloat*)pipeLine.GetWPTrans());
+  glUniformMatrix4fv(_gWVPLocation, 1, GL_TRUE, (const GLfloat*)pipeLine.GetWVPTrans());
 
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, _VBO);
@@ -78,6 +85,8 @@ void GLWidget::initGlut()
 
   glutDisplayFunc(glutRender);
   glutIdleFunc(glutRender);
+
+  _pGameCamera = new Camera(WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
 void GLWidget::initGlew()
@@ -108,7 +117,7 @@ void GLWidget::startGlutLoop()
    */
   compileShaders();
 
-  _gPersProjInfo.FOV = 30.0f;
+  _gPersProjInfo.FOV = 60.0f;
   _gPersProjInfo.Height = WINDOW_HEIGHT;
   _gPersProjInfo.Width = WINDOW_WIDTH;
   _gPersProjInfo.zNear = 1.0f;
@@ -236,10 +245,12 @@ void GLWidget::compileShaders()
   glUseProgram(ShaderProgram);
 
   /// This tutorial is about the use of Uniform shader attributes (matrices) to transform vertices, retrieve and store it.
-  _gWorldLocation = glGetUniformLocation(ShaderProgram, "gWorld");
+  _gWVPLocation = glGetUniformLocation(ShaderProgram, "gWVP");
+//  _gWorldLocation = glGetUniformLocation(ShaderProgram, "gWorld");
 
   /// Ensure it succeeded, handle the possible failure.
-  assert(_gWorldLocation != 0xFFFFFFFF);
+  assert(_gWVPLocation != 0xFFFFFFFF);
+//  assert(_gWorldLocation != 0xFFFFFFFF);
 }
 
 void GLWidget::resizeGL()

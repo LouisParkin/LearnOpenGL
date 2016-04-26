@@ -34,7 +34,9 @@ private:
   static GLuint _VBO, _IBO;
   static GLuint _gWorldLocation;
   static GLuint _gScaleLocation;
+  static GLuint _gWVPLocation;
   static PersProjInfo _gPersProjInfo;
+  static Camera* _pGameCamera;
 
   static void createVertexBuffer();
   static void compileShaders();

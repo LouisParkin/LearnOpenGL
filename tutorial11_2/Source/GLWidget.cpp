@@ -1,6 +1,5 @@
 #include "GLWidget.h"
 #include <GL/glut.h>
-#include <QThread>
 
 #include "ogldev_util.h"
 #include "ogldev_pipeline.h"
@@ -44,9 +43,9 @@ void GLWidget::glutRender()
   scale += 0.001f;
 
   Pipeline pipeLine;
-  pipeLine.Scale(sinf(scale * 0.1f), sinf(scale * 0.1f), sinf(scale * 0.1f));
-  pipeLine.WorldPos(sinf(scale), 0.0f, 0.0f);
-  pipeLine.Rotate(sinf(scale) * 90.0f, sinf(scale) * 90.0f, sinf(scale) * 90.0f);
+  pipeLine.Scale(cosf(scale * 0.1f), cosf(scale * 0.1f), cosf(scale * 0.1f));
+  pipeLine.WorldPos(/*sinf(scale)*/0.0f, cosf(scale), 0.0f);
+  pipeLine.Rotate(cosf(scale) * 90.0f, cosf(scale) * 90.0f, cosf(scale) * 90.0f);
 
   /// Load the matrix into the shader.
   glUniformMatrix4fv(_gWorldLocation, 1, GL_TRUE, (const GLfloat*)pipeLine.GetWorldTrans());
@@ -61,7 +60,6 @@ void GLWidget::glutRender()
   glDisableVertexAttribArray(0);
 
   glutSwapBuffers();
-  QThread::msleep(5);
 }
 
 void GLWidget::initGlut()

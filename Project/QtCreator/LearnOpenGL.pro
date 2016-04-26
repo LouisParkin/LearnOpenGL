@@ -18,7 +18,9 @@ INCLUDEPATH += ../../Source \
 SOURCES += ../../Source/main.cpp\
            ../../Source/mainwindow.cpp \
            ../../Source/GLWidget.cpp \
-           ../../Common/ogldev_util.cpp
+           ../../Common/ogldev_util.cpp \
+           ../../Common/math_3d.cpp \
+           ../../Common/pipeline.cpp
 
 HEADERS  += ../../Source/mainwindow.h \
             ../../Source/GLWidget.h

@@ -1,9 +1,7 @@
 #include "GLWidget.h"
 #include <GL/glut.h>
-#include <QThread>
 
 #include "ogldev_util.h"
-#include "ogldev_pipeline.h"
 #include "ogldev_math_3d.h"
 
 int GLWidget::_myGlutWindow = 0;
@@ -43,25 +41,33 @@ void GLWidget::glutRender()
   /// increment scale by 0.001.
   scale += 0.001f;
 
-  Pipeline pipeLine;
-  pipeLine.Scale(sinf(scale * 0.1f), sinf(scale * 0.1f), sinf(scale * 0.1f));
-  pipeLine.WorldPos(sinf(scale), 0.0f, 0.0f);
-  pipeLine.Rotate(sinf(scale) * 90.0f, sinf(scale) * 90.0f, sinf(scale) * 90.0f);
+  Matrix4f world;
+
+  ///
+
+  world.m[0][0] = cosf(scale); world.m[0][1] = 0.0f; world.m[0][2] = -sinf(scale); world.m[0][3] = 0.0f;
+  world.m[1][0] = 0.0f;        world.m[1][1] = 1.0f; world.m[1][2] = 0.0f;         world.m[1][3] = 0.0f;
+  world.m[2][0] = sinf(scale); world.m[2][1] = 0.0f; world.m[2][2] = cosf(scale);  world.m[2][3] = 0.0f;
+  world.m[3][0] = 0.0f;        world.m[3][1] = 0.0f; world.m[3][2] = 0.0f;         world.m[3][3] = 1.0f;
 
   /// Load the matrix into the shader.
-  glUniformMatrix4fv(_gWorldLocation, 1, GL_TRUE, (const GLfloat*)pipeLine.GetWorldTrans());
+  glUniformMatrix4fv(_gWorldLocation, 1, GL_TRUE, &world.m[0][0]);
+
+  /// Load the desired size into the shader.
+//  glUniform1f(_gScaleLocation, 0.9);
 
   glEnableVertexAttribArray(0);
+
   glBindBuffer(GL_ARRAY_BUFFER, _VBO);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IBO);
 
+//  glDrawArrays(GL_TRIANGLES, 0, 3);
   glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
   glDisableVertexAttribArray(0);
 
   glutSwapBuffers();
-  QThread::msleep(5);
 }
 
 void GLWidget::initGlut()
@@ -152,15 +158,14 @@ void GLWidget::createVertexBuffer()
 
 void GLWidget::createIndexBuffer()
 {
-  unsigned int Indices[] = { 0, 3, 1,
-                             1, 3, 2,
-                             2, 3, 0,
-                             0, 1, 2
-                           };
+    unsigned int Indices[] = { 0, 3, 1,
+                               1, 3, 2,
+                               2, 3, 0,
+                               0, 1, 2 };
 
-  glGenBuffers(1, &_IBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+    glGenBuffers(1, &_IBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 }
 
 void GLWidget::compileShaders()

@@ -1,6 +1,5 @@
 #include "GLWidget.h"
 #include <GL/glut.h>
-#include <QThread>
 
 #include "ogldev_util.h"
 #include "ogldev_pipeline.h"
@@ -61,7 +60,6 @@ void GLWidget::glutRender()
   glDisableVertexAttribArray(0);
 
   glutSwapBuffers();
-  QThread::msleep(5);
 }
 
 void GLWidget::initGlut()

@@ -53,7 +53,7 @@ void GLWidget::glutRender()
   glUniformMatrix4fv(_gWorldLocation, 1, GL_TRUE, &world.m[0][0]);
 
   /// Load the desired size into the shader.
-  glUniform1f(_gScaleLocation, 0.9);
+  glUniform1f(_gScaleLocation, 0.5);
 
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, _VBO);

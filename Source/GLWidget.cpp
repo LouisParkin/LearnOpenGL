@@ -3,8 +3,9 @@
 #include <math.h>
 
 #include "GLWidget.h"
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <QThread>
+#include <QDebug>
 
 #include "ogldev_glut_backend.h"
 #include "ogldev_camera.h"
@@ -13,18 +14,19 @@
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
 
-int GLWidget::_myGlutWindow = 0;
-GLuint GLWidget::_VBO = 0;
-GLuint GLWidget::_IBO = 0;
-GLuint GLWidget::_gWorldLocation = 0;
-GLuint GLWidget::_gWVPLocation = 0;
-GLuint GLWidget::_gScaleLocation;
+int GLWidget::_myGlutWindow = 0;      ///< a handle to the glutWindow.
+GLuint GLWidget::_VBO = 0;            ///< the Vertex Buffer Object.
+GLuint GLWidget::_IBO = 0;            ///< the Index Buffer Object.
+GLuint GLWidget::_gWorldLocation = 0; ///< where in the world the camera is? where in die world the object to be rendered is?
+GLuint GLWidget::_gWVPLocation = 0;   ///< where in the world the viewpoint / perspective is?
+GLuint GLWidget::_gScaleLocation;     ///< where in the world the scale value is?
 
-PersProjInfo GLWidget::_gPersProjInfo = PersProjInfo();
-Camera* GLWidget::_pGameCamera = NULL;
+PersProjInfo GLWidget::_gPersProjInfo = PersProjInfo(); ///< Perspective Projection Information.
+Camera* GLWidget::_pGameCamera = NULL;                  ///< Camera Instance.
 
-const char* pVSFileName = "/home/lparkin/Projects/S3/LearnOpenGL/shader.vs";
-const char* pFSFileName = "/home/lparkin/Projects/S3/LearnOpenGL/shader.fs";
+/// The names/location of the vertex and fragment shader GLSL files.
+const char* pVSFileName = "/home/lparkin/Projects/S3/LearnOpenGL/shader.vs"; ///< Vertex Shader File.
+const char* pFSFileName = "/home/lparkin/Projects/S3/LearnOpenGL/shader.fs"; ///< Fragment Shader File.
 
 GLWidget::GLWidget(QWidget* parent)
   : QOpenGLWidget(parent)
@@ -39,69 +41,90 @@ GLWidget::~GLWidget()
 
 void GLWidget::initializeGL()
 {
-  glClearColor(0.84, 0.84, 0.84, 0);
+  glClearColor(0.84, 0.84, 0.84, 0); ///< Makes the rendering surface of the Qt Widget grey.
 }
 
-/// The function, in this tutorial, used when Idle and when Rendering.
+/// The function, in this tutorial, used when Idle and when Rendering, for rendering.
 void GLWidget::glutRender()
 {
   glClear(GL_COLOR_BUFFER_BIT);
 
-  /// allocate a static variable scale
+  /// allocate a static variable scale for scale.
   static float scale = 0.0f;
 
-  /// increment scale by 0.001.
+  /// increment scale.
   scale += 0.01f;
 
   Pipeline pipeLine;
-  pipeLine.Rotate(0.0f, scale, 0.0f);
-  pipeLine.WorldPos(0.0f, 0.0f, 3.0f);
-  pipeLine.SetCamera(*_pGameCamera);
-  pipeLine.SetPerspectiveProj(_gPersProjInfo);
+  pipeLine.Rotate(0.0f, scale, 0.0f);           ///< Provides rotation information to the pipeline object.
+  pipeLine.WorldPos(0.0f, 0.0f, 3.0f);          ///< Provides World Position information to the pipeline object.
+  pipeLine.SetCamera(*_pGameCamera);            ///< Provides a handle to a Camera object for the pipeline.
+  pipeLine.SetPerspectiveProj(_gPersProjInfo);  ///< Provides the perspective projection information to the pipeline.
 
-  /// Load the matrix into the shader.
+  /// Load the matrix as a Uniform input into the Vertex shader.
   glUniformMatrix4fv(_gWVPLocation, 1, GL_TRUE, (const GLfloat*)pipeLine.GetWVPTrans());
 
   glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IBO);
+  glBindBuffer(GL_ARRAY_BUFFER, _VBO);                    ///< Bind the Vertex Buffer Object as an Array Buffer.
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);  ///<
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _IBO);            ///< Bind the Index Buffer Object as an Element Array Buffer.
 
-  glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);   ///< Draw the buffer.
 
   glDisableVertexAttribArray(0);
 
-  glutSwapBuffers();
+  glutSwapBuffers();                                      ///< Swap out the screenbuffer to render the current view.
 //  QThread::msleep(1);
 }
 
 void GLWidget::SpecialKeyboardCB(int Key, int x, int y)
 {
-    OGLDEV_KEY OgldevKey = GLUTKeyToOGLDEVKey(Key);
-    _pGameCamera->OnKeyboard(OgldevKey);
+    OGLDEV_KEY OgldevKey = GLUTKeyToOGLDEVKey(Key);   ///< Map the GLUT enum for key to the OGLDEV enum equivalent. Break internal library dependency on GLUT.
+    if(OgldevKey != OGLDEV_KEY_UNDEFINED)             ///< Workaround to circumvent an unexpected exit.
+    {
+      _pGameCamera->OnKeyboard(OgldevKey);            ///< Make the Camera aware that a key was pressed.
+    }
+    if(OgldevKey == OGLDEV_KEY_DELETE)
+    {
+      qDebug() << "Delete pressed";                   ///< Would have preferred ESC, but glut doesn't seem to handle it.
+      stopGlutLoop();
+    }
 }
 
 void GLWidget::initGlut()
 {
+  /// Init window size.
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+  /// Init window position.
   glutInitWindowPosition(100, 100);
+
+  /// Create the window.
   _myGlutWindow = glutCreateWindow("Tutorial");
 
+  /// Tell Glut which function to run for rendering output.
   glutDisplayFunc(glutRender);
+
+  /// Tell Glut which function to execute when Idle.
   glutIdleFunc(glutRender);
+
+  /// Tell Glut which function to execute when keyboard keys are pressed.
   glutSpecialFunc(SpecialKeyboardCB);
 
+  /// Initialize a camera
   _pGameCamera = new Camera(WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
 void GLWidget::initGlew()
 {
+  /// Initialize Glew
   GLenum res = glewInit();
   Q_ASSERT_X(res == GLEW_OK, "GLWidget::GLWidget()", "GLWidget could not initialize glew");
 }
 
 void GLWidget::startGlutLoop()
 {
+  /// Make the rendering surface's color Black
   glClearColor(0.0f/*.84*/, 0.0f/*.84*/, 0.0f/*.84*/, 0.0f);
 
   char* version = (char*)glGetString(GL_VERSION);
@@ -122,6 +145,9 @@ void GLWidget::startGlutLoop()
    */
   compileShaders();
 
+  /**
+   * Setup the perspective projection information.
+   */
   _gPersProjInfo.FOV = 60.0f;
   _gPersProjInfo.Height = WINDOW_HEIGHT;
   _gPersProjInfo.Width = WINDOW_WIDTH;
@@ -132,11 +158,15 @@ void GLWidget::startGlutLoop()
    * Start the rendering loop.
    */
   glutMainLoop();
+
+  qDebug() << "glutMainLoop exited";
 }
 
 void GLWidget::stopGlutLoop()
 {
-  glutDestroyWindow(_myGlutWindow);
+  glutLeaveMainLoop();
+
+//  glutDestroyWindow(_myGlutWindow);
 }
 
 void GLWidget::paintGL()

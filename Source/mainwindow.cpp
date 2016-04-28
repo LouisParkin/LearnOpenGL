@@ -38,5 +38,5 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
   ui->_glWidget->startGlutLoop();
 
-  QApplication::exit(0);
+//  QApplication::exit(0);
 }

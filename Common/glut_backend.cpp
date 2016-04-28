@@ -82,7 +82,8 @@ OGLDEV_KEY GLUTKeyToOGLDEVKey(uint Key)
             return OGLDEV_KEY_DELETE;
         default:
             OGLDEV_ERROR("Unimplemented GLUT key");
-            exit(1);
+            /*exit(1);*/  ///< this is a really crappy place to just exit.  Rather ignore.
+            break;
     }
     
     return OGLDEV_KEY_UNDEFINED;

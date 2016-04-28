@@ -141,7 +141,7 @@ bool Camera::OnKeyboard(OGLDEV_KEY Key)
         break;
     
     default:
-        break;            
+        break;
     }
 
     return Ret;

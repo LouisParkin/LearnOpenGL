@@ -23,7 +23,7 @@ public:
   static void glutRender();
   static void startGlutLoop();
 
-  void stopGlutLoop();
+  static void stopGlutLoop();
   void initGlew();
   void initGlut();
 private:
